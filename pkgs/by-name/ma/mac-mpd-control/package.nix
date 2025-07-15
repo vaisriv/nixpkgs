@@ -20,13 +20,15 @@ stdenv.mkDerivation rec {
     hash = "sha256-HMk3hU3eKhaWCDHJRJGNRR+YMhSwfTxNDy97Wk8fcF4=";
   };
 
-  buildInputs = [ cmake ];
+  nativeBuildInputs = [ cmake ];
 
   # buildPhase = ''
   #   make all
   # '';
 
   installPhase = ''
+    runHook preInstall
+
     mkdir -p $out/bin
     cp bin/mpdcontrold $out/bin/mpdcontrold
 
@@ -34,12 +36,14 @@ stdenv.mkDerivation rec {
     cp skel/at.fox21.mpdcontrold.plist $out/LaunchAgents/at.fox21.mpdcontrold.plist
     substituteInPlace $out/LaunchAgents/at.fox21.mpdcontrold.plist \
       --replace "/var/empty/local/bin/" "$out/bin/"
+
+    runHook postInstall
   '';
 
   passthru.updateScript = nix-update-script { };
 
   meta = {
-    platforms = [ "aarch64-darwin" "x86_64-darwin" ];
+    platforms = lib.platforms.darwin;
     changelog = "https://github.com/theOehrly/timple/releases/tag/v${version}";
     description = "Extended functionality for plotting timedelta-like values with Matplotlib";
     homepage = "https://github.com/theOehrly/timple";
